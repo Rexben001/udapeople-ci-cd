@@ -247,15 +247,15 @@ jobs:
             name: Install AWS CLI for rollback
             when: on_fail
             command: |
-               apt-get update && \
-               apt-get install -y \
+               sudo apt-get update && \
+               sudo apt-get install -y \
                     python3 \
                     python3-pip \
                     python3-setuptools \
                     groff \
                     less \
-               && pip3 install --upgrade pip \
-               && apt-get clean && pip3 install awscli
+               && sudo pip3 install --upgrade pip \
+               && sudo apt-get clean && sudo pip3 install awscli
       - destroy-environment:
               workflow_id: "${CIRCLE_WORKFLOW_ID}"       
 
@@ -289,15 +289,15 @@ jobs:
             name: Install AWS CLI
             when: on_fail
             command: |
-              apt-get update && \
-              apt-get install -y \
-                  python3 \
-                  python3-pip \
-                  python3-setuptools \
-                  groff \
-                  less \
-              && pip3 install --upgrade pip \
-              && apt-get clean && pip3 install awscli
+             sudo apt-get update && \
+             sudo apt-get install -y \
+                    python3 \
+                    python3-pip \
+                    python3-setuptools \
+                    groff \
+                    less \
+              && sudo pip3 install --upgrade pip \
+              && sudo apt-get clean && sudo pip3 install awscli
       
       - run:
           name: Deploy frontend objects
