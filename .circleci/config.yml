@@ -279,11 +279,13 @@ jobs:
       - run:
           name: Get backend url
           command: |
-            export BACKEND_IP=$(sed -n 2p .circleci/ansible/inventory.txt)
+            cat ~/project/.circleci/ansible/inventory.txt
+            export BACKEND_IP=$(sed -n 2p ~/project/.circleci/ansible/inventory.txt)
             export API_URL="http://${BACKEND_IP}:3030"
             echo ENVIRONMENT=production > "frontend/.env"
             echo API_URL=$API_URL >> "frontend/.env"
             echo "${API_URL}"
+
       - run:
           name: Build frontend
           command: |
@@ -296,14 +298,9 @@ jobs:
             when: on_fail
             command: |
              sudo apt-get update && \
-             sudo apt-get install -y \
-                    python3 \
-                    python3-pip \
-                    python3-setuptools \
-                    groff \
-                    less \
-              && sudo pip3 install --upgrade pip \
-              && sudo apt-get clean && sudo pip3 install awscli
+             sudo apt-get install awscli
+
+             echo aws --version
       
       - run:
           name: Deploy frontend objects
