@@ -11,9 +11,10 @@ commands:
           name: Destroy environments
           when: on_fail
           command: |
+            echo "WW ${parameters.workflow_id}, bb ${pipeline.parameters.workflow_id}"
             aws cloudformation delete-stack --stack-name udapeople-backend-<<parameters.workflow_id>>
-            aws s3 rm s3://udapeople-<<parameters.workflow_id>> --recursive
-            aws cloudformation delete-stack --stack-name udapeople-frontend-<<parameters.workflow_id>>
+            aws s3 rm s3://udapeople-<< parameters.workflow_id >> --recursive
+            aws cloudformation delete-stack --stack-name udapeople-frontend-<< parameters.workflow_i d>>
 
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
@@ -150,10 +151,11 @@ jobs:
       - run:
           name: Add back-end ip to ansible inventory
           command: |
-            aws ec2 describe-instances \ 
-            --query "Reservations[*].Instances[*].PublicIpAddress" \
-            --filters "Name=tag:project,Values=udapeople" \
-            --output text >>  .circleci/ansible/inventory.txt
+            aws ec2 describe-instances \
+              --query 'Reservations[*].Instances[*].PublicIpAddress' \
+              --filters "Name=tag:project,Values=udapeople" \
+              --output text >> .circleci/ansible/inventory.txt
+            cat .circleci/ansible/inventory.txt
       
       - persist_to_workspace:
           root: ~/
@@ -231,6 +233,7 @@ jobs:
             npm install
             npm run migrations > migration.log
             cat migration.log 
+            if grep -q STRING_YOU_ARE_CHECKING_FOR "$File"
 
       - run:
           name: Send migration results to memstash
