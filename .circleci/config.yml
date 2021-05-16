@@ -1,9 +1,5 @@
 version: 2.1
 
-parameters:
-  memstash_token: 
-    type: string
-    default: 1056f25f-a95f-487f-93d1-ad9feb0536c3
 commands:
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
@@ -243,7 +239,7 @@ jobs:
           name: Send migration results to memstash
           command: |
            curl -H "Content-Type: text/plain" \
-              -H "token: << pipeline.parameters.memstash-token >>" \
+              -H "token: 1056f25f-a95f-487f-93d1-ad9feb0536c3" \
               --request PUT --data "1" \
               https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID}
       - revert-migrations
