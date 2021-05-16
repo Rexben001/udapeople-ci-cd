@@ -125,10 +125,10 @@ jobs:
 
   deploy-infrastructure:
     docker:
-      - image: cimg/base:2020.01
+      - image: amazon/aws-cli
     steps:
+      # Checkout code from git
       - checkout
-      - aws-cli/setup
       - run:
           name: Ensure back-end infrastructure exists
           command: |
@@ -154,7 +154,7 @@ jobs:
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --filters "Name=tag:project,Values=udapeople" \
               --output text >> .circleci/ansible/inventory.txt
-              cat .circleci/ansible/inventory.txt
+              # cat .circleci/ansible/inventory.txt
       - persist_to_workspace:
           root: ~/
           paths:
