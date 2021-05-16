@@ -155,6 +155,7 @@ jobs:
               --filters "Name=tag:project,Values=udapeople" \
               --output text >> .circleci/ansible/inventory.txt
                cat .circleci/ansible/inventory.txt
+
       - run: yum -y install tar gzip
       - persist_to_workspace:
           root: ~/
@@ -271,20 +272,21 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Get backend url
+          command: |
+            cat .circleci/ansible/inventory.txt
+            export BACKEND_IP=$(sed -n 2p .circleci/ansible/inventory.txt)
+            export API_URL="http://${BACKEND_IP}:3030"
+            echo ENVIRONMENT=production > "frontend/.env"
+            echo API_URL=$API_URL >> "frontend/.env"
+            echo "${API_URL}"
+            
+      - run:
           name: Install dependencies
           command: |
             cd frontend
             npm install
 
-      - run:
-          name: Get backend url
-          command: |
-            cat ~/project/.circleci/ansible/inventory.txt
-            export BACKEND_IP=$(sed -n 2p ~/project/.circleci/ansible/inventory.txt)
-            export API_URL="http://${BACKEND_IP}:3030"
-            echo ENVIRONMENT=production > "frontend/.env"
-            echo API_URL=$API_URL >> "frontend/.env"
-            echo "${API_URL}"
 
       - run:
           name: Build frontend
