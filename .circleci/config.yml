@@ -1,5 +1,9 @@
 version: 2.1
 
+parameters:
+  memstash_token: 
+    type: string
+    default: 1056f25f-a95f-487f-93d1-ad9feb0536c3
 commands:
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
@@ -234,12 +238,14 @@ jobs:
             npm run migrations > migration.txt
             cat migration.txt 
             if grep -q "has been executed successfully" migration.txt; then exit 0; else exit 1; fi;
+            
       - run:
           name: Send migration results to memstash
           command: |
-            # Your code here
-            exit 1
-     # Here's where you will add some code to rollback on failure  
+           curl -H "Content-Type: text/plain" \
+              -H "token: << pipeline.parameters.memstash-token >>" \
+              --request PUT --data "1" \
+              https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID}
       - revert-migrations
       # - run:
       #       name: Install AWS CLI for rollback
@@ -249,26 +255,46 @@ jobs:
       - destroy-environment:
               workflow_id: "${CIRCLE_WORKFLOW_ID}"       
 
-#   deploy-frontend:
-#     docker:
-#       # Docker image here that supports AWS CLI
-#     steps:
-#       # Checkout code from git
-#       - run:
-#           name: Install dependencies
-#           command: |
-#             # your code here
-#       - run:
-#           name: Get backend url
-#           command: |
-#             # your code here
-#             export API_URL="http://${BACKEND_IP}:3030"
-#             echo "${API_URL}"
-#       - run:
-#           name: Deploy frontend objects
-#           command: |
-#             # your code here
-#       # Here's where you will add some code to rollback on failure      
+  deploy-frontend:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            cd frontend
+            npm install
+
+      - run:
+          name: Get backend url
+          command: |
+            export BACKEND_IP=$(sed -n 2p .circleci/ansible/inventory.txt)
+            export API_URL="http://${BACKEND_IP}:3030"
+            echo ENVIRONMENT=production > "frontend/.env"
+            echo API_URL=$API_URL >> "frontend/.env"
+            echo "${API_URL}"
+      - run:
+          name: Build frontend
+          command: |
+            cd frontend
+            cat .env
+            npm run build
+          
+      - run:
+            name: Install AWS CLI
+            when: on_fail
+            command: |
+              apk add --update py3-pip && pip3 install --upgrade pip && pip3 install awscli
+      
+      - run:
+          name: Deploy frontend objects
+          command: |
+              aws s3 cp --recursive frontend/dist "s3://udapeople-<<parameters.workflow-id>>"
+              exit 1
+
+      - destroy-environment: 
+          workflow_id: "${CIRCLE_WORKFLOW_ID}"     
                     
 #   deploy-backend:
 #     docker:
@@ -367,8 +393,8 @@ workflows:
           requires: [deploy-infrastructure]
       - run-migrations:
           requires: [configure-infrastructure]
-      # - deploy-frontend:
-      #     requires: [run-migrations]
+      - deploy-frontend:
+          requires: [run-migrations]
       # - deploy-backend:
       #     requires: [run-migrations]
       # - smoke-test:
