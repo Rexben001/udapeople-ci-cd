@@ -268,24 +268,28 @@ jobs:
 
   deploy-frontend:
     docker:
-       - image: circleci/node:13.8.0
+      - image: amazon/aws-cli
     steps:
       - checkout
+
+      - run:
+          name: Install dependencies
+          command: |
+            # your code here
+            yum -y install tar gzip
+            # Install nodejs on Fedora Core based on nodesource website instructions
+            curl -sL https://rpm.nodesource.com/setup_lts.x | bash -
+            yum -y install nodejs
+
       - run:
           name: Get backend url
           command: |
             cat .circleci/ansible/inventory.txt
-            export BACKEND_IP=$(sed -n 2p .circleci/ansible/inventory.txt)
+            BACKEND_IP=`cat .circleci/ansible/inventory.txt | head -2 | tail -1`
             export API_URL="http://${BACKEND_IP}:3030"
             echo ENVIRONMENT=production > "frontend/.env"
             echo API_URL=$API_URL >> "frontend/.env"
-            echo "${API_URL}"
-            
-      - run:
-          name: Install dependencies
-          command: |
-            cd frontend
-            npm install
+            echo "${API_URL}"            
 
 
       - run:
@@ -293,16 +297,17 @@ jobs:
           command: |
             cd frontend
             cat .env
+            npm install
             npm run build
           
-      - run:
-            name: Install AWS CLI
-            when: on_fail
-            command: |
-             sudo apt-get update && \
-             sudo apt-get install awscli
+      # - run:
+      #       name: Install AWS CLI
+      #       when: on_fail
+      #       command: |
+      #        sudo apt-get update && \
+      #        sudo apt-get install awscli
 
-             echo aws --version
+      #        echo aws --version
       
       - run:
           name: Deploy frontend objects
