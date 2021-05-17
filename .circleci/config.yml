@@ -268,18 +268,16 @@ jobs:
 
   deploy-frontend:
     docker:
-      - image: amazon/aws-cli
+      - image: python:3.7-alpine3.11
     steps:
       - checkout
-
+      - attach_workspace:
+          at: ~/
       - run:
           name: Install dependencies
           command: |
-            # your code here
-            yum -y install tar gzip
-            # Install nodejs on Fedora Core based on nodesource website instructions
-            curl -sL https://rpm.nodesource.com/setup_lts.x | bash -
-            yum -y install nodejs
+            apk add --update curl nodejs npm
+            pip install awscli
 
       - run:
           name: Get backend url
@@ -290,8 +288,6 @@ jobs:
             echo ENVIRONMENT=production > "frontend/.env"
             echo API_URL=$API_URL >> "frontend/.env"
             echo "${API_URL}"            
-
-
       - run:
           name: Build frontend
           command: |
