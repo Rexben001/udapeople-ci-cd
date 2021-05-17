@@ -339,10 +339,14 @@ jobs:
             echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> "backend/.env"
 
       - run:
-          name: Deploy backend
+          name: Copy backend files
           command: |
             cd /home
             tar czf backend.tar.gz -P /home/circleci/project/backend/dist
+
+      - run:
+          name: Deploy backend
+          command: |
             export ANSIBLE_HOST_KEY_CHECKING=False
             ansible-playbook \
               -i .circleci/ansible/inventory.txt \
