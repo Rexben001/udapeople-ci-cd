@@ -319,7 +319,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk add --update ansible openssh-client tar gzip aws-cli
+            apk add --update ansible openssh-client tar gzip
             pip install awscli
             cat .circleci/ansible/inventory.txt
       - restore_cache:
