@@ -1,4 +1,3 @@
-
 ---
 - name: "install dependencies."
   become: true
@@ -15,43 +14,20 @@
     production: yes
     state: present
 
-# - name: Copy backend dist files web server
-#   become: true
-#   copy:
-#     src: /root/project/backend
-#     dest: /home/ubuntu
-
-# - name: Install Node
-#   become: true
-#   shell: |
-#     cd /home/ubuntu/backend
-#     npm install
-# - name: Build Node
-#   become: true    
-#   shell: |
-#     cd /home/ubuntu/backend
-#     npm run build
-# - name: Start PM2
-#   become: true
-#   shell: |
-#     cd /home/ubuntu/backend
-#     pm2 start npm --name backend -- start
-
-- name: Copy backend files
-  become: true
+- name: Copy backend dist files web server
   copy:
-    src: /home/backend.tar.gz
-    dest: /home/ubuntu/backend.tar.gz
+    src: /root/project/backend
+    dest: /home/ubuntu
 
+- name: Install Node
+  shell: |
+    cd /home/ubuntu/backend
+    npm install
+- name: Build Node
+  shell: |
+    cd /home/ubuntu/backend
+    npm run build
 - name: Start PM2
   shell: |
-    cd /home/ubuntu/
-    tar xzvf backend.tar.gz
-    mv home/circleci/project/backend .
-    sudo npm install -g npm@latest
-    sudo npm install -g webpack-dev-server
-    cd backend
-    sudo npm install
-    sudo npm run build
-    sudo pm2 start npm --name backend -- start
-
+    cd /home/ubuntu/backend
+    pm2 start npm --name backend -- start

@@ -340,10 +340,10 @@ jobs:
             echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> "backend/.env"
             echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> "backend/.env"
 
-      - run:
-          name: Copy backend files
-          command: |
-            tar czf backend.tar.gz -P ~/project/backend/
+      # - run:
+      #     name: Copy backend files
+      #     command: |
+      #       tar czf backend.tar.gz -P project/backend/
 
       - run:
           name: Deploy backend
