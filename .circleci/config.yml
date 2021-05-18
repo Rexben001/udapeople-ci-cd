@@ -321,37 +321,43 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk add --update ansible openssh-client tar gzip
+            apk add --update ansible openssh-client tar zip nodejs npm
             pip install awscli
             cat .circleci/ansible/inventory.txt
       # - restore_cache:
       #     keys: ["backend-dist"]
       - run:
-          name: Set env
+          name: Build backend app
           command: |
-            echo ENVIROMENT=$ENVIROMENT > "backend/.env"
-            echo TYPEORM_CONNECTION=$TYPEORM_CONNECTION >> "backend/.env"
-            echo TYPEORM_MIGRATIONS_DIR=$TYPEORM_MIGRATIONS_DIR >> "backend/.env"
-            echo TYPEORM_ENTITIES=$TYPEORM_ENTITIES >> "backend/.env"
-            echo TYPEORM_MIGRATIONS=$TYPEORM_MIGRATIONS >> "backend/.env"
-            echo TYPEORM_HOST=$TYPEORM_HOST >> "backend/.env"
-            echo TYPEORM_PORT=$TYPEORM_PORT >> "backend/.env"
-            echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> "backend/.env"
-            echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> "backend/.env"
-            echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> "backend/.env"
+            cd ~/project/backend
+            npm i
+            npm run build
+            cd dist
+            cp ../package.json .
+            zip -rq dist.zip *
+            mkdir -p ~/project/.circleci/ansible/roles/deploy_backend/files/
+            mv dist.zip ~/project/.circleci/ansible/roles/deploy_backend/files/
+
+      - run:
+          name: Setup EC2 instance & copy compiled backend to the EC2 instance
+          command: |
+            ls ~/project/.circleci/ansible/roles/deploy_backend/files/
+            cd ~/project/backend
+            ansible-galaxy install weareinteractive.environment
+            ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i ~/project/.circleci/ansible/inventory.txt ~/project/.circleci/ansible/playbook.yml
 
       # - run:
       #     name: Copy backend files
       #     command: |
       #       tar czf backend.tar.gz -P project/backend/
 
-      - run:
-          name: Deploy backend
-          command: |
-            export ANSIBLE_HOST_KEY_CHECKING=False
-            ansible-playbook \
-              -i .circleci/ansible/inventory.txt \
-              .circleci/ansible/deploy-backend.yml
+      # - run:
+      #     name: Deploy backend
+      #     command: |
+      #       export ANSIBLE_HOST_KEY_CHECKING=False
+      #       ansible-playbook \
+      #         -i .circleci/ansible/inventory.txt \
+      #         .circleci/ansible/deploy-backend.yml
 
       - revert-migrations
       - destroy-environment:
