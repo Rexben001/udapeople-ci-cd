@@ -370,6 +370,7 @@ jobs:
           name: Get backend url
           command: |
             export BACKEND_IP=`cat .circleci/ansible/inventory.txt | head -2 | tail -1`
+            echo BACKEND_IP
             
       - run:
           name: Backend smoke test.
@@ -391,9 +392,9 @@ jobs:
             else
               return 0
             fi
-      - revert-migrations
-      - destroy-environment:
-          workflow_id: ${CIRCLE_WORKFLOW_ID}
+      # - revert-migrations
+      # - destroy-environment:
+      #     workflow_id: ${CIRCLE_WORKFLOW_ID}
 
   cloudfront-update:
     docker:
@@ -424,9 +425,9 @@ jobs:
               --parameter-overrides WorkflowID={CIRCLE_WORKFLOW_ID} \
               --tags project=udapeople
             exit 1
-      - revert-migrations
-      - destroy-environment:
-         workflow_id: ${CIRCLE_WORKFLOW_ID}
+      # - revert-migrations
+      # - destroy-environment:
+      #    workflow_id: ${CIRCLE_WORKFLOW_ID}
       # Here's where you will add some code to rollback on failure  
 
 # cleanup:
