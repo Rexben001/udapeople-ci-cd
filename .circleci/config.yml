@@ -164,6 +164,8 @@ jobs:
           root: ~/
           paths:
             - project/.circleci/ansible/inventory.txt
+            - project/backend/
+
       # Here's where you will add some code to rollback on failure   
       - destroy-environment:
           workflow_id: "${CIRCLE_WORKFLOW_ID}"   
@@ -322,8 +324,8 @@ jobs:
             apk add --update ansible openssh-client tar gzip
             pip install awscli
             cat .circleci/ansible/inventory.txt
-      - restore_cache:
-          keys: ["backend-dist"]
+      # - restore_cache:
+      #     keys: ["backend-dist"]
       - run:
           name: Set env
           command: |
@@ -341,8 +343,7 @@ jobs:
       - run:
           name: Copy backend files
           command: |
-            cd /home
-            tar czf backend.tar.gz -P /home/circleci/project/backend/dist
+            tar czf backend.tar.gz -P ~/project/backend/
 
       - run:
           name: Deploy backend
