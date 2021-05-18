@@ -370,13 +370,15 @@ jobs:
           name: Get backend url
           command: |
             echo "BACKEND_IP>> ${BACKEND_IP}"
-             echo "${API_URL}"
+            echo "${API_URL}"
             
       - run:
           name: Backend smoke test.
           command: |
             echo "BACKEND_IP>> ${BACKEND_IP}"
             BACKEND_IP=`cat .circleci/ansible/inventory.txt | head -2 | tail -1`
+            echo "BACKEND_IP1>> ${BACKEND_IP}"
+
             if curl -s https://${BACKEND_IP}:3030/api/status
             then
             return 0
@@ -394,9 +396,9 @@ jobs:
             else
               return 1
             fi
-      - revert-migrations
-      - destroy-environment:
-          workflow_id: ${CIRCLE_WORKFLOW_ID}
+      # - revert-migrations
+      # - destroy-environment:
+      #     workflow_id: ${CIRCLE_WORKFLOW_ID}
 
   cloudfront-update:
     docker:
