@@ -9,9 +9,9 @@
 #     update_cache: yes
 
 - name: "install pm2"
+  become: yes
   npm:
     name: pm2
-    become: yes
     global: yes
     production: yes
     state: present
