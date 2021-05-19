@@ -11,9 +11,11 @@
 - name: "install pm2"
   npm:
     name: pm2
+    become: yes
     global: yes
     production: yes
     state: present
+    
 
 - name: "Creates backend app directory"
   file:
@@ -32,6 +34,7 @@
     rm -rf dist.zip
 
 - name: "Install dependencies for project"
+  become: yes
   shell: |
     cd ~/backend_app
     npm install
