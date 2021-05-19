@@ -1,4 +1,28 @@
 ---
+- name: "update apt packages."
+  apt:
+    update_cache: yes
+
+- name: "upgrade packages"
+  apt:
+    upgrade: yes
+
+- name: install node
+  shell: |
+    curl -sL https://deb.nodesource.com/setup_13.x | sudo -E bash - && sudo apt-get install -y nodejs
+- name: "Install zip utility."
+  apt:
+    name: [ "zip", "unzip" ]
+    state: latest
+    update_cache: yes
+
+- name: "install pm2"
+  npm:
+    name: pm2
+    global: yes
+    production: yes
+    state: present
+
 - name: "Creates backend app directory"
   file:
     path: ~/backend_app
@@ -14,21 +38,25 @@
     cd ~/backend_app
     unzip dist.zip
     rm -rf dist.zip
+
 - name: "Install dependencies for project"
   shell: |
     cd ~/backend_app
     npm install
-- name: "Executing node"
-  shell: |
-    export
-    cd ~/backend_app
-    pm2 start main.js
-  register: execute_node
+    npm run build
+    pm2 start npm --name backend -- start
 
-- name: print message
-  debug:
-    msg: "{{ execute_node.stdout_lines }}"
+# - name: "Executing node"
+#   shell: |
+#     export
+#     cd ~/backend_app
+#     pm2 start main.js
+#   register: execute_node
 
-- name: "Configure pm2 to start as service"
-  shell: |
-    env PATH=$PATH:/usr/local/bin pm2 startup -u ubuntu
+# - name: print message
+#   debug:
+#     msg: "{{ execute_node.stdout_lines }}"
+
+# - name: "Configure pm2 to start as service"
+#   shell: |
+#     env PATH=$PATH:/usr/local/bin pm2 startup -u ubuntu

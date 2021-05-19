@@ -20,4 +20,6 @@
     - TYPEORM_DATABASE: "{{ lookup('env','TYPEORM_DATABASE') }}"
 
   roles:
+    - role: weareinteractive.environment
+      become: true
     - deploy
