@@ -57,19 +57,32 @@ jobs:
       - checkout
       - restore_cache:
           keys: [backend-build]
+      - attach_workspace:
+          at: /tmp/workspace
       - run:
           name: Back-end build
           command: |
             cd backend
              npm install
              npm run build
-            #  exit 1
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build
       - save_cache:
           paths: [backend/dist]
           key: backend-dist 
+      - run:
+          name: Copy compiled backend for future use in ansible
+          command: |
+            mkdir /tmp/workspace
+            cp ./backend/package.json /tmp/workspace/
+            cd backend/dist
+            tar -zcvf /tmp/workspace/backend.tar.gz ./
+      - persist_to_workspace:
+          root: /tmp/workspace
+          paths:
+            - backend.tar.gz
+            - package.json
 
   test-frontend:
     docker:
@@ -317,22 +330,21 @@ jobs:
       - add_ssh_keys:
           fingerprints: [8d:2e:6c:f1:40:9c:7b:d7:7a:1d:23:a0:cd:ab:59:05]
       - attach_workspace:
-          at: ~/
+          at: /tmp/workspace
       - run:
           name: Install dependencies
           command: |
             apk add --update ansible openssh-client tar zip nodejs npm
+            ansible-galaxy install weareinteractive.environment
             pip install awscli
             cat .circleci/ansible/inventory.txt
       - restore_cache:
           keys: ["backend-dist"]
       - run:
-          name: Build backend app
+          name: Log folders
           command: |
-           ls home/circleci/project/backend/dist
-           cd /home
-           tar czf backend.tar.gz -P /home/circleci/project/backend/dist
-           ls
+           echo $(pwd)
+           ls /root/project/backend
 
       # - run:
       #     name: Setup EC2 instance & copy compiled backend to the EC2 instance
