@@ -216,7 +216,7 @@ jobs:
             echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> "backend/.env"
             echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> "backend/.env"
             
-            echo $(curl -H "token: c1bb8d5a-fbac-4fad-9506-124d34aa4fb6 --request GET https://api.memstash.io/values/backend_ip_address_${CIRCLE_WORKFLOW_ID}) >> .circleci/ansible/inventory.txt
+            echo $(curl -H "token: c1bb8d5a-fbac-4fad-9506-124d34aa4fb6" --request GET https://api.memstash.io/values/backend_ip_address_${CIRCLE_WORKFLOW_ID}) >> .circleci/ansible/inventory.txt
             ansible-playbook \
               -i .circleci/ansible/inventory.txt \
               .circleci/ansible/configure-server.yml
@@ -305,7 +305,7 @@ jobs:
       - run:
           name: Get backend url
           command: |
-            BACKEND_IP=$(curl -H "token: c1bb8d5a-fbac-4fad-9506-124d34aa4fb6 --request GET https://api.memstash.io/values/backend_ip_address_${CIRCLE_WORKFLOW_ID})
+            BACKEND_IP=$(curl -H "token: c1bb8d5a-fbac-4fad-9506-124d34aa4fb6" --request GET https://api.memstash.io/values/backend_ip_address_${CIRCLE_WORKFLOW_ID})
             export API_URL="http://${BACKEND_IP}:3030"
             echo ENVIRONMENT=production > "frontend/.env"
             echo API_URL=$API_URL >> "frontend/.env"
@@ -354,7 +354,7 @@ jobs:
       - run:
           name: Deploy backend
           command: |
-            echo $(curl -H "token: c1bb8d5a-fbac-4fad-9506-124d34aa4fb6 --request GET https://api.memstash.io/values/backend_ip_address_${CIRCLE_WORKFLOW_ID}) >> .circleci/ansible/inventory.txt
+            echo $(curl -H "token: c1bb8d5a-fbac-4fad-9506-124d34aa4fb6" --request GET https://api.memstash.io/values/backend_ip_address_${CIRCLE_WORKFLOW_ID}) >> .circleci/ansible/inventory.txt
             export ANSIBLE_HOST_KEY_CHECKING=False
             ansible-playbook \
               -i .circleci/ansible/inventory.txt \
@@ -383,7 +383,7 @@ jobs:
       - run:
           name: Backend smoke test.
           command: |
-            BACKEND_IP=$(curl -H "token: c1bb8d5a-fbac-4fad-9506-124d34aa4fb6 --request GET https://api.memstash.io/values/backend_ip_address_${CIRCLE_WORKFLOW_ID})
+            BACKEND_IP=$(curl -H "token: c1bb8d5a-fbac-4fad-9506-124d34aa4fb6" --request GET https://api.memstash.io/values/backend_ip_address_${CIRCLE_WORKFLOW_ID})
             if curl -s https://${BACKEND_IP}:3030/api/status
             then
             return 0
