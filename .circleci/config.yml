@@ -166,11 +166,15 @@ jobs:
       - run:
           name: Add back-end ip to ansible inventory
           command: |
-             aws ec2 describe-instances \
+            BACKEND_IP=(aws ec2 describe-instances \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --filters "Name=tag:project,Values=udapeople" \
-              --output text >> .circleci/ansible/inventory.txt
-               cat .circleci/ansible/inventory.txt
+              --output text)
+
+               curl -H "Content-Type: text/plain" \
+              -H "token: 1056f25f-a95f-487f-93d1-ad9feb0536c3" \
+              --request PUT --data $BACKEND_IP \
+              https://api.memstash.io/values/backend_ip_address_${CIRCLE_WORKFLOW_ID}
 
       - run: yum -y install tar gzip
       - persist_to_workspace:
@@ -212,6 +216,7 @@ jobs:
             echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> "backend/.env"
             echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> "backend/.env"
             
+            echo $(curl -H "token: c1bb8d5a-fbac-4fad-9506-124d34aa4fb6 --request GET https://api.memstash.io/values/backend_ip_address_${CIRCLE_WORKFLOW_ID}) >> .circleci/ansible/inventory.txt
             ansible-playbook \
               -i .circleci/ansible/inventory.txt \
               .circleci/ansible/configure-server.yml
@@ -300,12 +305,12 @@ jobs:
       - run:
           name: Get backend url
           command: |
-            cat .circleci/ansible/inventory.txt
-            export BACKEND_IP=`cat .circleci/ansible/inventory.txt | head -2 | tail -1`
+            BACKEND_IP=$(curl -H "token: c1bb8d5a-fbac-4fad-9506-124d34aa4fb6 --request GET https://api.memstash.io/values/backend_ip_address_${CIRCLE_WORKFLOW_ID})
             export API_URL="http://${BACKEND_IP}:3030"
             echo ENVIRONMENT=production > "frontend/.env"
             echo API_URL=$API_URL >> "frontend/.env"
             echo "${API_URL}"            
+            echo "BACKEND_IP: ${BACKEND_IP}"            
       - run:
           name: Build frontend
           command: |
@@ -346,22 +351,10 @@ jobs:
            echo $(pwd)
            ls /root/project/backend
 
-      # - run:
-      #     name: Setup EC2 instance & copy compiled backend to the EC2 instance
-      #     command: |
-      #       export ANSIBLE_HOST_KEY_CHECKING=False
-      #       ansible-playbook \
-      #         -i .circleci/ansible/inventory.txt \
-      #         .circleci/ansible/deploy-backend.yml
-
-      # - run:
-      #     name: Copy backend files
-      #     command: |
-      #       tar czf backend.tar.gz -P project/backend/
-
       - run:
           name: Deploy backend
           command: |
+            echo $(curl -H "token: c1bb8d5a-fbac-4fad-9506-124d34aa4fb6 --request GET https://api.memstash.io/values/backend_ip_address_${CIRCLE_WORKFLOW_ID}) >> .circleci/ansible/inventory.txt
             export ANSIBLE_HOST_KEY_CHECKING=False
             ansible-playbook \
               -i .circleci/ansible/inventory.txt \
@@ -390,10 +383,7 @@ jobs:
       - run:
           name: Backend smoke test.
           command: |
-            echo "BACKEND_IP>> ${BACKEND_IP}"
-            BACKEND_IP=`cat .circleci/ansible/inventory.txt | head -2 | tail -1`
-            echo "BACKEND_IP1>> ${BACKEND_IP}"
-
+            BACKEND_IP=$(curl -H "token: c1bb8d5a-fbac-4fad-9506-124d34aa4fb6 --request GET https://api.memstash.io/values/backend_ip_address_${CIRCLE_WORKFLOW_ID})
             if curl -s https://${BACKEND_IP}:3030/api/status
             then
             return 0
