@@ -18,9 +18,12 @@
     dest: /home/ubuntu/app/
     owner: ubuntu
 
-- name: "Testing env variable"
-  debug:
-    msg: "My env variable is: '{{ lookup('env', 'TYPEORM_ENTITIES') }}'"
+- name: "Copy .env to server"
+  become: yes
+  copy:
+    src: /tmp/workspace/.env
+    dest: /home/ubuntu/app/
+    owner: ubuntu
 
 - name: "Install NPM dependencies"
   shell:
@@ -37,6 +40,7 @@
     export TYPEORM_DATABASE="{{ lookup('env', 'TYPEORM_DATABASE') }}"
     cd /home/ubuntu/app
     pm2 start main.js --name app
+
 - name: "Set pm2 start as service"
   become: yes
   shell: |
