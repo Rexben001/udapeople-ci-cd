@@ -172,7 +172,7 @@ jobs:
           command: |
             BACKEND_IP=$(aws ec2 describe-instances \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
-              --filters Name=tag:project,Values=udapeople \
+              --region us-west-2 --filters Name=tag:project,Values=udapeople \ 
               --output text)
               echo ${BACKEND_IP}
                curl -H "Content-Type: text/plain" \
@@ -223,7 +223,7 @@ jobs:
 
             aws ec2 describe-instances \
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
-            --filters Name=tag:project,Values=udapeople \
+            --region us-west-2 --filters Name=tag:project,Values=udapeople \ 
             --output text >> .circleci/ansible/inventory.txt
             
             #  echo $(curl -H "token:  260f5b61-00fd-475f-aeb2-5afcf4d42afd" --request GET https://api.memstash.io/values/backend_ip_address) >> .circleci/ansible/inventory.txt
@@ -320,7 +320,7 @@ jobs:
 
             BACKEND_IP= $(aws ec2 describe-instances \
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
-            --filters Name=tag:project,Values=udapeople \
+            --region us-west-2 --filters Name=tag:project,Values=udapeople \ 
             --output text)
             export API_URL="http://${BACKEND_IP}:3030"
             echo ENVIRONMENT=production > "frontend/.env"
@@ -374,7 +374,7 @@ jobs:
 
             aws ec2 describe-instances \
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
-            --filters Name=tag:project,Values=udapeople \
+            --region us-west-2 --filters Name=tag:project,Values=udapeople \ 
             --output text >> .circleci/ansible/inventory.txt
             export ANSIBLE_HOST_KEY_CHECKING=False
             ansible-playbook \
@@ -407,7 +407,7 @@ jobs:
             # BACKEND_IP=$(curl -H "token:  260f5b61-00fd-475f-aeb2-5afcf4d42afd" --request GET https://api.memstash.io/values/backend_ip_address)
             BACKEND_IP=$(aws ec2 describe-instances \
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
-            --filters Name=tag:project,Values=udapeople \
+            --region us-west-2 --filters Name=tag:project,Values=udapeople \ 
             --output text) >> .circleci/ansible/inventory.txt
             if curl -s https://${BACKEND_IP}:3030/api/status
             then
