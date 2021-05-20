@@ -376,7 +376,6 @@ jobs:
           command: |
             echo $(pwd)
             ls /root/project/backend
-            cat /root/project/backend/.env
 
       - run:
           name: Deploy backend
