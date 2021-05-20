@@ -204,6 +204,7 @@ jobs:
           name: Install dependencies
           command: |
             apk add --update ansible curl
+            pip install awscl
             cat .circleci/ansible/inventory.txt
       - run:
           name: Configure server
@@ -230,11 +231,11 @@ jobs:
             ansible-playbook \
               -i .circleci/ansible/inventory.txt \
               .circleci/ansible/configure-server.yml
-      - run:
-            name: Install AWS CLI for rollback
-            when: on_fail
-            command: |
-              apk add --update py3-pip && pip3 install --upgrade pip && pip3 install awscli
+      # - run:
+      #       name: Install AWS CLI for rollback
+      #       when: on_fail
+      #       command: |
+      #         apk add --update py3-pip && pip3 install --upgrade pip && pip3 install awscli
         
       - destroy-environment:
               workflow_id: "${CIRCLE_WORKFLOW_ID}"   
@@ -407,7 +408,7 @@ jobs:
             BACKEND_IP=$(aws ec2 describe-instances \
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
             --filters Name=tag:project,Values=udapeople \
-            --output text)
+            --output text) >> .circleci/ansible/inventory.txt
             if curl -s https://${BACKEND_IP}:3030/api/status
             then
             return 0
