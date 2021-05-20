@@ -357,10 +357,11 @@ jobs:
       - restore_cache:
           keys: ["backend-dist"]
       - run:
-          name: Log folders
+          name: Create .env file and log folders
           command: |
             echo $(pwd)
             ls /root/project/backend
+            mkdir /root/project/backend/.env
             echo ENVIRONMENT=production > "/root/project/backend/.env"
             echo TYPEORM_CONNECTION=postgres >> "/root/project/backend/.env"
             echo TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts >> "/root/project/backend/.env"
