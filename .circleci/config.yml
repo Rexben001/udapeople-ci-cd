@@ -310,7 +310,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk add --update curl nodejs npm curl
+            apk add --update nodejs npm curl
             pip install awscli
 
       - run:
@@ -352,10 +352,9 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk add --update ansible openssh-client tar zip nodejs npm curl 
+            apk add --update ansible openssh-client tar nodejs npm curl 
             ansible-galaxy install weareinteractive.environment
             pip install awscli
-            cat .circleci/ansible/inventory.txt
       - restore_cache:
           keys: ["backend-dist"]
       - run:
@@ -367,7 +366,6 @@ jobs:
       - run:
           name: Deploy backend
           command: |
-            # echo $(curl -H "token:  260f5b61-00fd-475f-aeb2-5afcf4d42afd" --request GET https://api.memstash.io/values/backend_ip_address) >> .circleci/ansible/inventory.txt
             aws ec2 describe-instances --region us-west-2  \
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
             --output text >> .circleci/ansible/inventory.txt
@@ -405,9 +403,9 @@ jobs:
             echo "BACKEND_IP: ${BACKEND_IP}"
             if curl -s https://${BACKEND_IP}:3030/api/status
             then
-            return 0
-            else
             return 1
+            else
+            return 0
             fi
       - run:
           name: Frontend smoke test.
@@ -420,9 +418,9 @@ jobs:
             else
               return 1
             fi
-      # - revert-migrations
-      # - destroy-environment:
-      #     workflow_id: ${CIRCLE_WORKFLOW_ID}
+      - revert-migrations
+      - destroy-environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID}
 
   cloudfront-update:
     docker:
@@ -432,7 +430,9 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk add --update py3-pip && pip3 install --upgrade pip && pip3 install awscli
+            apk add --update curl 
+            pip install awscli
+
       - run:
           name: Save old workflowID
           command: |
@@ -443,7 +443,7 @@ jobs:
             curl -H "Content-Type: text/plain" \
               -H "token: 1056f25f-a95f-487f-93d1-ad9feb0536c3" \
               --request PUT --data "$OldWorkflowID" \
-              https://api.memstash.io/values/old_workflow_id_${CIRCLE_WORKFLOW_ID}
+              https://api.memstash.io/values/old_workflow_id
       - run:
           name: Update cloudfront distribution
           command: |
@@ -452,7 +452,7 @@ jobs:
               --stack-name "udapeople-cloudfront" \
               --parameter-overrides WorkflowID={CIRCLE_WORKFLOW_ID} \
               --tags project=udapeople
-            exit 1
+
       - revert-migrations
       - destroy-environment:
          workflow_id: ${CIRCLE_WORKFLOW_ID}
