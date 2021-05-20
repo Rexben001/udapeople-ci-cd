@@ -75,7 +75,7 @@ jobs:
           name: Copy compiled backend for future use in ansible
           command: |
             # mkdir /tmp/workspace
-            touch /root/project/backend/.env
+            touch ./backend/.env
             echo ENVIRONMENT=production > "./backend/.env"
             echo TYPEORM_CONNECTION=postgres >> "./backend/.env"
             echo TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts >> "./backend/.env"
