@@ -75,7 +75,22 @@ jobs:
           name: Copy compiled backend for future use in ansible
           command: |
             # mkdir /tmp/workspace
+            touch /root/project/backend/.env
+            echo ENVIRONMENT=production > "./backend/.env"
+            echo TYPEORM_CONNECTION=postgres >> "./backend/.env"
+            echo TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts >> "./backend/.env"
+            echo TYPEORM_MIGRATIONS=./src/migrations/*.ts >> "./backend/.env"
+            echo TYPEORM_MIGRATIONS_DIR=./src/migrations >> "./backend/.env"
+            echo NODE_ENV=production >> "./backend/.env"
+            echo TYPEORM_HOST=$TYPEORM_HOST >> "./backend/.env"
+            echo TYPEORM_PORT=$TYPEORM_PORT >> "./backend/.env"
+            echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> "./backend/.env"
+            echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> "./backend/.env"
+            echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> "./backend/.env"
+
             cp ./backend/package.json /tmp/workspace/
+            cp ./backend/.env /tmp/workspace/
+
             cd backend/dist
             tar -zcvf /tmp/workspace/backend.tar.gz ./
       - persist_to_workspace:
@@ -361,21 +376,7 @@ jobs:
           command: |
             echo $(pwd)
             ls /root/project/backend
-            touch /root/project/backend/.env
-            echo ENVIRONMENT=production > "/root/project/backend/.env"
-            echo TYPEORM_CONNECTION=postgres >> "/root/project/backend/.env"
-            echo TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts >> "/root/project/backend/.env"
-            echo TYPEORM_MIGRATIONS=./src/migrations/*.ts >> "/root/project/backend/.env"
-            echo TYPEORM_MIGRATIONS_DIR=./src/migrations >> "/root/project/backend/.env"
-            echo NODE_ENV=production >> "/root/project/backend/.env"
-            echo TYPEORM_HOST=$TYPEORM_HOST >> "/root/project/backend/.env"
-            echo TYPEORM_PORT=$TYPEORM_PORT >> "/root/project/backend/.env"
-            echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> "/root/project/backend/.env"
-            echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> "/root/project/backend/.env"
-            echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> "/root/project/backend/.env"
-
-            echo "Second list"
-            ls /root/project/backend
+            cat /root/project/backend/.env
 
       - run:
           name: Deploy backend
