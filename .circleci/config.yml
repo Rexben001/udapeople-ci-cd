@@ -74,23 +74,8 @@ jobs:
       - run:
           name: Copy compiled backend for future use in ansible
           command: |
-            # mkdir /tmp/workspace
-            touch ./backend/.env
-            echo ENVIRONMENT=production > "./backend/.env"
-            echo TYPEORM_CONNECTION=postgres >> "./backend/.env"
-            echo TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts >> "./backend/.env"
-            echo TYPEORM_MIGRATIONS=./src/migrations/*.ts >> "./backend/.env"
-            echo TYPEORM_MIGRATIONS_DIR=./src/migrations >> "./backend/.env"
-            echo NODE_ENV=production >> "./backend/.env"
-            echo TYPEORM_HOST=$TYPEORM_HOST >> "./backend/.env"
-            echo TYPEORM_PORT=$TYPEORM_PORT >> "./backend/.env"
-            echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> "./backend/.env"
-            echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> "./backend/.env"
-            echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> "./backend/.env"
-
+            # mkdir /tmp/workspace/
             cp ./backend/package.json /tmp/workspace/
-            cp ./backend/.env /tmp/workspace/
-
             cd backend/dist
             tar -zcvf /tmp/workspace/backend.tar.gz ./
       - persist_to_workspace:
@@ -219,6 +204,8 @@ jobs:
           command: |
             apk add --update ansible curl
             pip install awscli
+            ansible-galaxy install weareinteractive.environment
+
             cat .circleci/ansible/inventory.txt
       - run:
           name: Configure server
