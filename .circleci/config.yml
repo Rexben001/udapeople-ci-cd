@@ -219,8 +219,14 @@ jobs:
             echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> "backend/.env"
             echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> "backend/.env"
             echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> "backend/.env"
+
+            aws ec2 describe-instances \
+            --query 'Reservations[*].Instances[*].PublicIpAddress' \
+            --filters Name=tag:project,Values=udapeople \
+            --output text >> .circleci/ansible/inventory.txt
             
-            echo $(curl -H "token:  260f5b61-00fd-475f-aeb2-5afcf4d42afd" --request GET https://api.memstash.io/values/backend_ip_address) >> .circleci/ansible/inventory.txt
+            #  echo $(curl -H "token:  260f5b61-00fd-475f-aeb2-5afcf4d42afd" --request GET https://api.memstash.io/values/backend_ip_address) >> .circleci/ansible/inventory.txt
+
             ansible-playbook \
               -i .circleci/ansible/inventory.txt \
               .circleci/ansible/configure-server.yml
@@ -309,7 +315,12 @@ jobs:
       - run:
           name: Get backend url
           command: |
-            BACKEND_IP=$(curl -H "token:  260f5b61-00fd-475f-aeb2-5afcf4d42afd" --request GET https://api.memstash.io/values/backend_ip_address)
+            # BACKEND_IP=$(curl -H "token:  260f5b61-00fd-475f-aeb2-5afcf4d42afd" --request GET https://api.memstash.io/values/backend_ip_address)
+
+            BACKEND_IP= $(aws ec2 describe-instances \
+            --query 'Reservations[*].Instances[*].PublicIpAddress' \
+            --filters Name=tag:project,Values=udapeople \
+            --output text)
             export API_URL="http://${BACKEND_IP}:3030"
             echo ENVIRONMENT=production > "frontend/.env"
             echo API_URL=$API_URL >> "frontend/.env"
@@ -358,7 +369,12 @@ jobs:
       - run:
           name: Deploy backend
           command: |
-            echo $(curl -H "token:  260f5b61-00fd-475f-aeb2-5afcf4d42afd" --request GET https://api.memstash.io/values/backend_ip_address) >> .circleci/ansible/inventory.txt
+            # echo $(curl -H "token:  260f5b61-00fd-475f-aeb2-5afcf4d42afd" --request GET https://api.memstash.io/values/backend_ip_address) >> .circleci/ansible/inventory.txt
+
+            aws ec2 describe-instances \
+            --query 'Reservations[*].Instances[*].PublicIpAddress' \
+            --filters Name=tag:project,Values=udapeople \
+            --output text >> .circleci/ansible/inventory.txt
             export ANSIBLE_HOST_KEY_CHECKING=False
             ansible-playbook \
               -i .circleci/ansible/inventory.txt \
@@ -387,7 +403,11 @@ jobs:
       - run:
           name: Backend smoke test.
           command: |
-            BACKEND_IP=$(curl -H "token:  260f5b61-00fd-475f-aeb2-5afcf4d42afd" --request GET https://api.memstash.io/values/backend_ip_address)
+            # BACKEND_IP=$(curl -H "token:  260f5b61-00fd-475f-aeb2-5afcf4d42afd" --request GET https://api.memstash.io/values/backend_ip_address)
+            BACKEND_IP=$(aws ec2 describe-instances \
+            --query 'Reservations[*].Instances[*].PublicIpAddress' \
+            --filters Name=tag:project,Values=udapeople \
+            --output text)
             if curl -s https://${BACKEND_IP}:3030/api/status
             then
             return 0
