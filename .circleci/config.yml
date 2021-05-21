@@ -436,24 +436,23 @@ jobs:
       - run:
           name: Update cloudfront distribution
           command: |
-            OldWorkflowId=$(aws cloudformation list-exports --query "Exports[?Name=='WorkflowID'].Value" --no-paginate --output text)
-            STACKS=$(aws cloudformation list-stacks --query "StackSummaries[*].StackName" --stack-status-filter CREATE_COMPLETE --output text)
-            echo OldWorkflowId: ${OldWorkflowId}
-            echo Test 2
-            echo STACKS: ${STACKS}
-            echo Update CloudFront
-            aws cloudformation update-stack \
-            --use-previous-template \
-            --stack-name udapeople-prod-cloudfront \
-            --parameters ParameterKey=WorkflowID,ParameterValue=$CIRCLE_WORKFLOW_ID,UsePreviousValue=false
-              
-            echo Delete old stacks/resources            
-            if [[ "${STACKS[@]}" =~ "${OldWorkflowId}" ]]
+            export OldWorkflowID=$(aws cloudformation list-exports --query "Exports[?Name=='WorkflowID'].Value" --no-paginate --output text)
+            echo Old Workflow Id: "${OldWorkflowID}"
+            if [ -n "${OldWorkflowID}" ]
             then
-              # echo Delete old stacks/resources ${OldWorkflowId}
-              aws s3 rm s3://udapeople-${OldWorkflowId} --recursive
-              aws cloudformation delete-stack --stack-name udacity-backend-${OldWorkflowId}
-              aws cloudformation delete-stack --stack-name udacity-frontend-${OldWorkflowId}
+              echo "Updating existing CloudFront stack..."
+              aws cloudformation update-stack \
+                --template-body file://./.circleci/files/cloudfront.yml \
+                --stack-name cloudfront-udapeople \
+                --parameters ParameterKey=WorkflowID,ParameterValue=${CIRCLE_WORKFLOW_ID}
+              echo "Saving old workflow id..."
+              curl -H "Content-Type: text/plain" -H "token: 55d1f101-ab86-42bb-8bea-ea171a873220" --request PUT --data "${OldWorkflowID}" https://api.memstash.io/values/old_workflow_id
+            else
+              echo "Creating new CloudFront sack..."
+              aws cloudformation create-stack \
+                --template-body file://./.circleci/files/cloudfront.yml \
+                --stack-name cloudfront-udapeople \
+                --parameters ParameterKey=WorkflowID,ParameterValue=${CIRCLE_WORKFLOW_ID}
             fi
             exit 1
 
