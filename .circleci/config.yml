@@ -444,7 +444,7 @@ jobs:
             echo Update CloudFront
             aws cloudformation update-stack \
             --use-previous-template \
-            --stack-name cloudfront-stack \
+            --stack-name udapeople-prod-cloudfront \
             --parameters ParameterKey=WorkflowID,ParameterValue=$CIRCLE_WORKFLOW_ID,UsePreviousValue=false
               
             echo Delete old stacks/resources            
