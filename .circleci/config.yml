@@ -171,6 +171,7 @@ jobs:
           name: Add back-end ip to ansible inventory
           command: |
             BACKEND_IP=$(aws ec2 describe-instances --region us-west-2  \
+              --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID}" \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
                 --output text)
             echo ${BACKEND_IP}
@@ -310,6 +311,7 @@ jobs:
           name: Get backend url
           command: |
             BACKEND_IP=$(aws ec2 describe-instances --region us-west-2 \
+            --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID}" \
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
             --output text)
             export API_URL="http://${BACKEND_IP}:3030"
@@ -391,6 +393,7 @@ jobs:
           name: Backend smoke test.
           command: |
             BACKEND_IP=$(aws ec2 describe-instances --region us-west-2 \
+            --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID}" \
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
             --output text)
             echo "BACKEND_IP: ${BACKEND_IP}"
