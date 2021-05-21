@@ -434,24 +434,33 @@ jobs:
             pip install awscli
 
       - run:
-          name: Save old workflowID
-          command: |
-            export OldWorkflowID=$(aws cloudformation list-exports \
-              --query "Exports[?Name==\`WorkflowID\`].Value" \
-              --no-paginate --output text)
-            echo "Old Workflow ID>> ${OldWorkflowID}"
-            curl -H "Content-Type: text/plain" \
-              -H "token: 1056f25f-a95f-487f-93d1-ad9feb0536c3" \
-              --request PUT --data "$OldWorkflowID" \
-              https://api.memstash.io/values/old_workflow_id
-      - run:
           name: Update cloudfront distribution
           command: |
+            OldWorkflowId=$(aws cloudformation list-exports --query "Exports[?Name=='WorkflowID'].Value" --output text)
+            STACKS=$(aws cloudformation list-stacks --query "StackSummaries[*].StackName" --stack-status-filter CREATE_COMPLETE --output text)
+            echo OldWorkflowId: ${OldWorkflowId}
+            echo Test 2
+            echo STACKS: ${STACKS}
+            echo Update CloudFront
             aws cloudformation deploy \
+              --stack-name circleci-stack \
               --template-file .circleci/files/cloudfront.yml \
-              --stack-name "udapeople-cloudfront" \
-              --parameter-overrides WorkflowID={CIRCLE_WORKFLOW_ID} \
-              --tags project=udapeople
+              --region ${AWS_DEFAULT_REGION} \
+              --tags Name=udacity-prod \
+              --parameter-overrides WorkflowID=${CIRCLE_WORKFLOW_ID}
+              
+            echo Delete old stacks/resources            
+            if [[ "${STACKS[@]}" =~ "${OldWorkflowId}" ]]
+            then
+              # Delete files from bucket
+              echo Delete old stacks/resources ${OldWorkflowId}
+              aws s3 rm s3://udapeople-${OldWorkflowId}/ --recursive
+              # Delete front end stack
+              aws cloudformation delete-stack --stack-name udacity-frontend-${OldWorkflowId}
+              # Delete back end stack
+              aws cloudformation delete-stack --stack-name udacity-backend-${OldWorkflowId}
+            fi
+            exit 1
 
       - revert-migrations
       - destroy-environment:
