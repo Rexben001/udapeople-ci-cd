@@ -53,8 +53,3 @@
 - name: print message
   debug:
     msg: "{{ execute_node.stdout_lines }}"
-
-# - name: "Set pm2 start as service"
-#   become: yes
-#   shell: |
-#     env PATH=$PATH:/usr/local/bin pm2 startup -u ubuntu
