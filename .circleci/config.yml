@@ -438,10 +438,8 @@ jobs:
           command: |
             export OldWorkflowID=$(aws cloudformation list-exports --query "Exports[?Name=='WorkflowID'].Value" --no-paginate --output text)
             echo Old Workflow Id: "${OldWorkflowID}"
-            curl -H "Content-Type: text/plain" \
-            -H "token: 1056f25f-a95f-487f-93d1-ad9feb0536c3" \
-            --request PUT --data "$OldWorkflowID" 
-            https://api.memstash.io/values/old-workflow-id
+            curl -H "Content-Type: text/plain" -H "token: 55d1f101-ab86-42bb-8bea-ea171a873220" --request PUT --data "${OldWorkflowID}" https://api.memstash.io/values/old_workflow_id
+
 
             if [ -n "${OldWorkflowID}" ]
             then
@@ -451,7 +449,6 @@ jobs:
                 --stack-name udapeople-prod-cloudfront \
                 --parameters ParameterKey=WorkflowID,ParameterValue=${CIRCLE_WORKFLOW_ID}
               echo "Saving old workflow id..."
-              curl -H "Content-Type: text/plain" -H "token: 55d1f101-ab86-42bb-8bea-ea171a873220" --request PUT --data "${OldWorkflowID}" https://api.memstash.io/values/old_workflow_id
             else
               echo "Creating new CloudFront sack..."
               aws cloudformation create-stack \
