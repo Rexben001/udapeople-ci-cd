@@ -173,8 +173,8 @@ jobs:
             BACKEND_IP=$(aws ec2 describe-instances --region us-west-2  \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
                 --output text)
-              echo ${BACKEND_IP}
-               curl -H "Content-Type: text/plain" \
+            echo ${BACKEND_IP}
+            curl -H "Content-Type: text/plain" \
               -H "token: 1056f25f-a95f-487f-93d1-ad9feb0536c3" \
               --request PUT --data "$BACKEND_IP" \
               https://api.memstash.io/values/backend_ip_address
@@ -431,13 +431,18 @@ jobs:
           name: Install dependencies
           command: |
             apk add --update curl 
-            pip install awscli
+            pip install awscli 
 
       - run:
           name: Update cloudfront distribution
           command: |
             export OldWorkflowID=$(aws cloudformation list-exports --query "Exports[?Name=='WorkflowID'].Value" --no-paginate --output text)
             echo Old Workflow Id: "${OldWorkflowID}"
+            url -H "Content-Type: text/plain" \
+            -H "token: 1056f25f-a95f-487f-93d1-ad9feb0536c3" \
+            --request PUT --data "$OldWorkflowID" \
+            https://api.memstash.io/values/old-workflow-id
+
             if [ -n "${OldWorkflowID}" ]
             then
               echo "Updating existing CloudFront stack..."
@@ -454,30 +459,32 @@ jobs:
                 --stack-name udapeople-prod-cloudfront \
                 --parameters ParameterKey=WorkflowID,ParameterValue=${CIRCLE_WORKFLOW_ID}
             fi
-            exit 1
 
       - revert-migrations
       - destroy-environment:
          workflow_id: ${CIRCLE_WORKFLOW_ID}
 
-# cleanup:
-#     docker:
-#       # Docker image here
-#     steps:
-#       # Checkout code from git
-#       - run:
-#           name: Get old stack workflow id
-#           command: |
-#             # your code here
-#             export OldWorkflowID="the id here"
-#             export STACKS=[] #put the list of stacks here
-#       - run:
-#           name: Remove old stacks and files
-#           command: |
-#             if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
-#             then
-#               # your code here
-#             fi
+cleanup:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Get old stack workflow id
+          command: |
+            export OldWorkflowID=$(curl -H "token: 1056f25f-a95f-487f-93d1-ad9feb0536c3" --request GET https://api.memstash.io/values/old-workflow-id)
+      - run:
+          name: Remove old stacks and files
+          command: |
+              if [ "${OldWorkflowID}" != "${CIRCLE_WORKFLOW_ID}" ]
+              then
+                # your code here
+                # Delete front- and back-end stacks
+                aws cloudformation delete-stack --stack-name udapeople-frontend-${OldWorkflowID}
+                aws cloudformation delete-stack --stack-name udapeople-backend-${OldWorkflowID}
+                aws s3 rb s3://udapeople-${OldWorkflowID} --force
+              fi
+
             
 
 workflows:
@@ -510,5 +517,5 @@ workflows:
           requires: [deploy-backend, deploy-frontend]
       - cloudfront-update:
           requires: [smoke-test]
-      # - cleanup:
-      #     requires: [cloudfront-update]
+      - cleanup:
+          requires: [cloudfront-update]
