@@ -262,13 +262,13 @@ jobs:
             npm install
             npm run migrations > migration.txt
             cat migration.txt 
-            # if grep -q "has been executed successfully" migration.txt; 
-            # then
-            #   echo "successfully migrations" > ~/project/.circleci/outputs/db_migration_success
-            #  exit 0;
-            # else 
-            #   exit 1; 
-            # fi;
+            if grep -q "has been executed successfully" migration.txt; 
+            then
+              echo "successfully migrations" > ~/project/.circleci/outputs/db_migration_success
+             exit 0;
+            else 
+              exit 1; 
+            fi;
             
       - run:
           name: Send migration results to memstash
@@ -350,8 +350,6 @@ jobs:
             apk add --update ansible openssh-client tar nodejs npm curl 
             ansible-galaxy install weareinteractive.environment
             pip install awscli
-      - restore_cache:
-          keys: ["backend-dist"]
       - run:
           name: Create .env file and log folders
           command: |
