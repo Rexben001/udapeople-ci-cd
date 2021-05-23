@@ -263,7 +263,6 @@ jobs:
             npm install
             npm run migrations > migration.txt
             cat migration.txt 
-            touch ~/project/.circleci/outputs/db_migration_success.txt
             # if grep -q "has been executed successfully" migration.txt; 
             # then
             #   echo "successfully migrations" > ~/project/.circleci/outputs/db_migration_success.txt
