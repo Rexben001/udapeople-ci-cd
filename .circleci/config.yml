@@ -223,6 +223,7 @@ jobs:
             echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> "backend/.env"
 
             aws ec2 describe-instances --region us-west-2  \
+            --filters "Name=tag:project,Values=udapeople" \
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
             --output text >> .circleci/ansible/inventory.txt
             
