@@ -70,5 +70,5 @@ pipeline {
     //             echo 'Done testing frontend'
     //         }
     //     }
-    // }
+    }
 }
