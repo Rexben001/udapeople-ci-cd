@@ -1,5 +1,7 @@
 pipeline {
-    agent any
+    agent {
+            label 'docker' 
+    }
     environment {
         // list all environmental variables
         VERSION_NO = '1.0'
@@ -22,6 +24,7 @@ pipeline {
         stage('build-frontend') {
                 agent {
                 docker {
+                    label 'docker' 
                     image 'node:14-alpine'
                     // Run the container on the node specified at the top-level of the Pipeline, in the same workspace, rather than on a new node entirely:
                     reuseNode true
@@ -38,6 +41,7 @@ pipeline {
         stage('build-backend') {
                 agent {
                 docker {
+                    label 'docker' 
                     image 'node:14-alpine'
                     // Run the container on the node specified at the top-level of the Pipeline, in the same workspace, rather than on a new node entirely:
                     reuseNode true
@@ -60,6 +64,7 @@ pipeline {
         stage('test-frontend') {
                 agent {
                 docker {
+                    label 'docker' 
                     image 'node:14-alpine'
                     // Run the container on the node specified at the top-level of the Pipeline, in the same workspace, rather than on a new node entirely:
                     reuseNode true
