@@ -1,7 +1,9 @@
 pipeline {
     agent {
-            label 'docker' 
-    }
+docker {
+            image 'node:lts-buster-slim'
+            args '-p 3000:3000'
+        }    }
     environment {
         // list all environmental variables
         VERSION_NO = '1.0'
@@ -11,9 +13,7 @@ pipeline {
         string(name: 'VERSION', defaultValue: '1.01', description: 'Version umber')
     }
 
-     tools {
-    nodejs 'default-nodejs'
-  }
+  
 
         stages {
         stage('build-frontend') {
@@ -28,6 +28,7 @@ pipeline {
             steps {
                 sh 'node --version'
                 sh 'cd frontend'
+                sh '---trying to install---'
                 sh 'npm install'
                 sh 'npm run build'
                 echo 'Done building frontend'
