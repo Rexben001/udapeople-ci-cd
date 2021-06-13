@@ -11,16 +11,20 @@ pipeline {
         string(name: 'VERSION', defaultValue: '1.01', description: 'Version umber')
     }
 
+     tools {
+    nodejs 'default-nodejs'
+  }
+
         stages {
         stage('build-frontend') {
-                agent {
-                docker {
-                    label 'docker' 
-                    image 'node:14-alpine'
-                    // Run the container on the node specified at the top-level of the Pipeline, in the same workspace, rather than on a new node entirely:
-                    reuseNode true
-                }
-            }
+            //     agent {
+            //     docker {
+            //         label 'docker' 
+            //         image 'node:14-alpine'
+            //         // Run the container on the node specified at the top-level of the Pipeline, in the same workspace, rather than on a new node entirely:
+            //         reuseNode true
+            //     }
+            // }
             steps {
                 sh 'node --version'
                 sh 'cd frontend'
